@@ -68,12 +68,7 @@ const App = () => {
   };
 
   const handleCreateChannel = async () => {
-    // Join Channel using null token and channel name
-    // const chan = await RtcChannel.create(newChannelName);
-    // setChannel(chan);
-    // console.log('chan ', chan);
     const url = CREATECHANNEL;
-    console.log('newChannelName', newChannelName);
     axiosInstance
       .post(url, {newChannelName})
       .then(res => {

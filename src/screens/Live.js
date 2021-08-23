@@ -7,14 +7,19 @@ import RtcEngine, {
 } from 'react-native-agora';
 import Styles from '@style/Styles';
 import requestCameraAndAudioPermission from '@components/Permission';
+import axiosInstance from '@api/axios';
+import {CREATECHANNEL} from '@api/Endpoint';
 const Live = ({route, navigation}) => {
-  const {appId, channelName, token} = route.params.data.data;
-  console.log('route.params', route.params.data.data);
+  console.log('route.params ', route.params.item);
+  const {_id, tourName, tourToken} = route.params.item;
+  const appId = 'e2168f29e26546e6b16b92e31a9b643f';
+
+  const [channelName, setChannelName] = useState(tourName);
+  const [token, setToken] = useState(tourToken);
   const [joinSucceed, setJoinSucceed] = useState(false);
   const [peerIds, setPeerIds] = useState([]);
   const [_engine, setEngine] = useState(undefined);
   const init = async () => {
-    console.log('appid ', appId);
     const eng = await RtcEngine.create(appId);
     console.log('eng ', eng);
     await eng.enableVideo();
@@ -62,6 +67,19 @@ const Live = ({route, navigation}) => {
     setJoinSucceed(false);
     setPeerIds([]);
   };
+  const handleCreateChannel = async () => {
+    const url = CREATECHANNEL;
+    axiosInstance
+      .patch(url, {_id, tourName})
+      .then(res => {
+        console.log('res ', res.data);
+        setToken(res.data.data.tour.tourToken);
+        setChannelName(res.data.data.tour.tourName);
+      })
+      .catch(error => {
+        console.log('error ', error);
+      });
+  };
   if (Platform.OS === 'android') {
     // Request required permissions from Android
     requestCameraAndAudioPermission().then(() => {
@@ -106,14 +124,24 @@ const Live = ({route, navigation}) => {
   };
   return (
     <View style={Styles.max}>
-      <View style={Styles.buttonHolder}>
-        <TouchableOpacity onPress={() => startCall()} style={Styles.button}>
-          <Text style={Styles.buttonText}> Start Call </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => endCall()} style={Styles.button}>
-          <Text style={Styles.buttonText}> End Call </Text>
-        </TouchableOpacity>
-      </View>
+      {token ? (
+        <View style={Styles.buttonHolder}>
+          <TouchableOpacity onPress={() => startCall()} style={Styles.button}>
+            <Text style={Styles.buttonText}> Start Call </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => endCall()} style={Styles.button}>
+            <Text style={Styles.buttonText}> End Call </Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={Styles.buttonHolder}>
+          <TouchableOpacity
+            onPress={() => handleCreateChannel()}
+            style={Styles.button}>
+            <Text style={Styles.buttonText}> Get Token </Text>
+          </TouchableOpacity>
+        </View>
+      )}
       {_renderVideos()}
     </View>
   );

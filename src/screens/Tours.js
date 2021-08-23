@@ -8,63 +8,43 @@ import {
   ImageBackground,
 } from 'react-native';
 import axiosInstance from '@api/axios';
-import {CREATECHANNEL} from '@api/Endpoint';
+import {GETALLTOURS} from '@api/Endpoint';
 import Styles from '@style/Styles';
 
 const Tours = ({navigation}) => {
-  const [newChannelName, setNewChannelName] = useState('');
-  const handleCreateChannel = async item => {
-    const url = CREATECHANNEL;
+  const [tours, setTours] = useState([]);
+  useEffect(() => {
+    const url = GETALLTOURS;
     axiosInstance
-      .post(url, item)
+      .get(url)
       .then(res => {
-        console.log('res ', res.data);
-        navigation.navigate('Live', {data: res.data});
+        // console.log('res ', JSON.stringify(res.data.data.tours));
+        setTours(res.data.data.tours);
       })
       .catch(error => {
         console.log('error ', error);
       });
+  }, []);
+  const renderItem = ({item}) => {
+    return (
+      <TouchableOpacity
+        style={Styles.tile}
+        onPress={() => navigation.navigate('Live', {item})}>
+        <ImageBackground
+          source={{uri: item.tourImage}}
+          style={Styles.backImage}>
+          <Text style={Styles.title}>{item.tourName}</Text>
+        </ImageBackground>
+      </TouchableOpacity>
+    );
   };
-  const image = {
-    uri: 'https://images.pexels.com/photos/1591447/pexels-photo-1591447.jpeg',
-  };
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'Islamabad',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Rawalpindi',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Lahore',
-    },
-    {
-      id: '58694a0f-3da1-sase-bd96-145571e29d72',
-      title: 'Karachi',
-    },
-    {
-      id: '58694a0f-3da1-471f-1qww-145571e29d72',
-      title: 'Peshawar',
-    },
-  ];
-  const renderItem = ({item}) => (
-    <TouchableOpacity
-      style={Styles.tile}
-      onPress={() => handleCreateChannel(item)}>
-      <ImageBackground source={image} style={Styles.backImage}>
-        <Text style={Styles.title}>{item.title}</Text>
-      </ImageBackground>
-    </TouchableOpacity>
-  );
+
   return (
     <View style={Styles.main}>
       <FlatList
-        data={DATA}
+        data={tours}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item._id}
         numColumns={2}
       />
     </View>

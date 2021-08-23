@@ -46,7 +46,26 @@ export default StyleSheet.create({
     color: '#0093E9',
   },
   main: {flex: 1, alignItems: 'center'},
-  tile: {width: '40%', height: 200, marginHorizontal: 20, marginTop: 15},
+  tile: {
+    width: '40%',
+    height: 200,
+    marginHorizontal: 20,
+    marginTop: 15,
+  },
   backImage: {width: '100%', height: '100%'},
   title: {color: 'white', fontWeight: 'bold', fontSize: 20},
+  ///////////      Create   \\\\\\\\\\\\\\\\\\
+  inputData: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textInput: {
+    borderWidth: 2,
+    borderRadius: 20,
+    paddingLeft: 15,
+    height: 40,
+    width: '80%',
+    marginVertical: 15,
+  },
 });

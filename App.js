@@ -1,16 +1,33 @@
 import * as React from 'react';
+import {Button, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import Tours from './src/screens/Tours';
 import Live from './src/screens/Live';
+import Create from './src/screens/Create';
 
 const Stack = createStackNavigator();
 
 const MyStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" component={Tours} />
+      <Stack.Screen
+        name="Home"
+        component={Tours}
+        options={({navigation, route}) => ({
+          headerRight: () => (
+            <View style={{marginRight: 15}}>
+              <Button
+                onPress={() => navigation.navigate('Create')}
+                title="+"
+                color="black"
+              />
+            </View>
+          ),
+        })}
+      />
       <Stack.Screen name="Live" component={Live} />
+      <Stack.Screen name="Create" component={Create} />
     </Stack.Navigator>
   );
 };
