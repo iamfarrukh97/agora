@@ -11,7 +11,8 @@ import axiosInstance from '@api/axios';
 import {GETALLTOURS} from '@api/Endpoint';
 import Styles from '@style/Styles';
 
-const Tours = ({navigation}) => {
+const Tours = ({route, navigation}) => {
+  const {userType} = route.params;
   const [tours, setTours] = useState([]);
   useEffect(() => {
     const url = GETALLTOURS;
@@ -29,7 +30,7 @@ const Tours = ({navigation}) => {
     return (
       <TouchableOpacity
         style={Styles.tile}
-        onPress={() => navigation.navigate('Live', {item})}>
+        onPress={() => navigation.navigate('Live', {item, userType})}>
         <ImageBackground
           source={{uri: item.tourImage}}
           style={Styles.backImage}>

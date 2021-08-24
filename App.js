@@ -5,12 +5,14 @@ import {createStackNavigator} from '@react-navigation/stack';
 import Tours from './src/screens/Tours';
 import Live from './src/screens/Live';
 import Create from './src/screens/Create';
+import UserType from './src/screens/UserType';
 
 const Stack = createStackNavigator();
 
 const MyStack = () => {
   return (
     <Stack.Navigator>
+      <Stack.Screen name="UserType" component={UserType} />
       <Stack.Screen
         name="Home"
         component={Tours}

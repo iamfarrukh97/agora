@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, TouchableOpacity, Platform} from 'react-native';
+import {View, Text, TouchableOpacity, Platform, ScrollView} from 'react-native';
 import RtcEngine, {
   RtcLocalView,
   RtcRemoteView,
@@ -10,18 +10,18 @@ import requestCameraAndAudioPermission from '@components/Permission';
 import axiosInstance from '@api/axios';
 import {CREATECHANNEL} from '@api/Endpoint';
 const Live = ({route, navigation}) => {
-  console.log('route.params ', route.params.item);
   const {_id, tourName, tourToken} = route.params.item;
+  const {userType} = route.params;
   const appId = 'e2168f29e26546e6b16b92e31a9b643f';
-
-  const [channelName, setChannelName] = useState(tourName);
+  const [channelName, setChannelName] = useState('');
   const [token, setToken] = useState(tourToken);
+  const [userAccount, setUid] = useState('');
+
   const [joinSucceed, setJoinSucceed] = useState(false);
   const [peerIds, setPeerIds] = useState([]);
   const [_engine, setEngine] = useState(undefined);
   const init = async () => {
     const eng = await RtcEngine.create(appId);
-    console.log('eng ', eng);
     await eng.enableVideo();
 
     eng.addListener('Warning', warn => {
@@ -57,9 +57,27 @@ const Live = ({route, navigation}) => {
     });
     setEngine(eng);
   };
+  // const startCall = async () => {
+  //   // console.log('optionalUid ', optionalUid);
+  //   // Join Channel using null token and channel name
+  //   try {
+  //     await _engine?.joinChannel(token, channelName, null, 0);
+  //   } catch (error) {
+  //     console.log('error ', error);
+  //   }
+  // };
   const startCall = async () => {
+    // console.log('optionalUid ', optionalUid);
     // Join Channel using null token and channel name
-    await _engine?.joinChannel(token, channelName, null, 0);
+    try {
+      await _engine?.joinChannelWithUserAccount(
+        token,
+        channelName,
+        userAccount,
+      );
+    } catch (error) {
+      console.log('error ', error);
+    }
   };
 
   const endCall = async () => {
@@ -68,13 +86,16 @@ const Live = ({route, navigation}) => {
     setPeerIds([]);
   };
   const handleCreateChannel = async () => {
+    let r = (Math.random() + 1).toString(36).substring(7);
+    console.log('random', r);
     const url = CREATECHANNEL;
     axiosInstance
-      .patch(url, {_id, tourName})
+      .patch(url, {_id: r, tourName, userType})
       .then(res => {
         console.log('res ', res.data);
-        setToken(res.data.data.tour.tourToken);
-        setChannelName(res.data.data.tour.tourName);
+        setToken(res.data.data.token);
+        setChannelName(res.data.data.channelName);
+        setUid(res.data.data.uid);
       })
       .catch(error => {
         console.log('error ', error);
@@ -83,7 +104,7 @@ const Live = ({route, navigation}) => {
   if (Platform.OS === 'android') {
     // Request required permissions from Android
     requestCameraAndAudioPermission().then(() => {
-      console.log('requested!');
+      // console.log('requested!');
     });
   }
   useEffect(() => {
@@ -109,8 +130,10 @@ const Live = ({route, navigation}) => {
         contentContainerStyle={{paddingHorizontal: 2.5}}
         horizontal={true}>
         {peerIds.map(value => {
+          console.log('peerIds ', value);
           return (
             <RtcRemoteView.SurfaceView
+              key={value}
               style={Styles.remote}
               uid={value}
               channelId={channelName}
