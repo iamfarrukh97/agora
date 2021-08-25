@@ -4,6 +4,8 @@ import RtcEngine, {
   RtcLocalView,
   RtcRemoteView,
   VideoRenderMode,
+  ChannelProfile,
+  ClientRole,
 } from 'react-native-agora';
 import Styles from '@style/Styles';
 import requestCameraAndAudioPermission from '@components/Permission';
@@ -25,7 +27,7 @@ const Live = ({route, navigation}) => {
     await eng.enableVideo();
 
     eng.addListener('Warning', warn => {
-      console.log('Warning', warn);
+      // console.log('Warning', warn);
     });
 
     eng.addListener('Error', err => {
@@ -50,25 +52,14 @@ const Live = ({route, navigation}) => {
     });
 
     // If Local user joins RTC channel
-    eng.addListener('JoinChannelSuccess', (channel, uid, elapsed) => {
-      console.log('JoinChannelSuccess', channel, uid, elapsed);
+    eng.addListener('JoinChannelSuccess', (channel, uid, elapsed, role) => {
+      console.log('JoinChannelSuccess', channel, uid, elapsed, role);
       // Set state variable to true
       setJoinSucceed(true);
     });
     setEngine(eng);
   };
-  // const startCall = async () => {
-  //   // console.log('optionalUid ', optionalUid);
-  //   // Join Channel using null token and channel name
-  //   try {
-  //     await _engine?.joinChannel(token, channelName, null, 0);
-  //   } catch (error) {
-  //     console.log('error ', error);
-  //   }
-  // };
   const startCall = async () => {
-    // console.log('optionalUid ', optionalUid);
-    // Join Channel using null token and channel name
     try {
       await _engine?.joinChannelWithUserAccount(
         token,
@@ -86,6 +77,17 @@ const Live = ({route, navigation}) => {
     setPeerIds([]);
   };
   const handleCreateChannel = async () => {
+    // await _engine.setChannelProfile(
+    //     ChannelProfile.LiveBroadcasting,
+    //   );
+    console.log(
+      'profile ',
+      await _engine.setChannelProfile(ChannelProfile.LiveBroadcasting),
+    );
+    console.log('userType', userType);
+    if (userType == 'host') {
+      await _engine?.setClientRole(ClientRole.Broadcaster);
+    }
     let r = (Math.random() + 1).toString(36).substring(7);
     console.log('random', r);
     const url = CREATECHANNEL;
@@ -118,19 +120,38 @@ const Live = ({route, navigation}) => {
           channelId={channelName}
           renderMode={VideoRenderMode.Hidden}
         />
-        {_renderRemoteVideos()}
+        {/* {_renderRemoteVideos()} */}
       </View>
     ) : null;
   };
 
+  // const _renderRemoteVideos = () => {
+  //   return (
+  //     <ScrollView
+  //       style={Styles.remoteContainer}
+  //       contentContainerStyle={{paddingHorizontal: 2.5}}
+  //       horizontal={true}>
+  //       {peerIds.map(value => {
+  //         console.log('peerIds ', value);
+  //         return (
+  //           <RtcRemoteView.SurfaceView
+  //             key={value}
+  //             style={Styles.remote}
+  //             uid={value}
+  //             channelId={channelName}
+  //             renderMode={VideoRenderMode.Hidden}
+  //             zOrderMediaOverlay={true}
+  //           />
+  //         );
+  //       })}
+  //     </ScrollView>
+  //   );
+  // };
   const _renderRemoteVideos = () => {
     return (
-      <ScrollView
-        style={Styles.remoteContainer}
-        contentContainerStyle={{paddingHorizontal: 2.5}}
-        horizontal={true}>
+      <View style={Styles.fullView}>
         {peerIds.map(value => {
-          console.log('peerIds ', value);
+          console.log('_renderRemoteVideos peerIds ', value);
           return (
             <RtcRemoteView.SurfaceView
               key={value}
@@ -142,7 +163,7 @@ const Live = ({route, navigation}) => {
             />
           );
         })}
-      </ScrollView>
+      </View>
     );
   };
   return (
@@ -165,7 +186,7 @@ const Live = ({route, navigation}) => {
           </TouchableOpacity>
         </View>
       )}
-      {_renderVideos()}
+      {userType == 'host' ? _renderVideos() : _renderRemoteVideos()}
     </View>
   );
 };

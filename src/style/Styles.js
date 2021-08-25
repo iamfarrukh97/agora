@@ -36,9 +36,8 @@ export default StyleSheet.create({
     top: 5,
   },
   remote: {
-    width: 150,
-    height: 150,
-    marginHorizontal: 2.5,
+    width: '100%',
+    height: '100%',
   },
   noUserText: {
     paddingHorizontal: 10,
